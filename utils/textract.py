@@ -1,11 +1,10 @@
 import os
 import boto3
 import time
-from botocore.exceptions import NoCredentialsError, PartialCredentialsError
 from utils.s3 import upload_to_s3, save_text_to_s3
 
 def extract_text_from_pdf(bucket, document_key):
-    textract_client = boto3.client('textract')
+    textract_client = boto3.client(service_name='textract')
 
     try:
         response = textract_client.start_document_text_detection(
