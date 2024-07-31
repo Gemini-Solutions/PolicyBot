@@ -28,7 +28,7 @@ def create_embeddings(text, region_name, model = 'amazon.titan-embed-text-v2:0')
             accept= "application/json",
             body= json.dumps({'inputText': text})
         )
-        embeddings = json.loads(response['body'].read()).get('embeddings')
+        embeddings = json.loads(response['body'].read()).get('embedding')
         print("Success")
         return embeddings
     except Exception as e:
