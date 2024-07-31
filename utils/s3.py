@@ -6,7 +6,7 @@ def upload_to_s3(file_name, bucket, object_name=None):
     if object_name is None:
         object_name = os.path.basename(file_name)
 
-    s3_client = boto3.client('s3')
+    s3_client = boto3.client(service_name='s3')
 
     try:
         s3_client.upload_file(file_name, bucket, object_name)
@@ -33,7 +33,7 @@ def upload_pdfs_in_folder(folder_path, bucket):
                 upload_to_s3(file_path, bucket)
 
 def delete_from_s3(bucket, object_name):
-    s3_client = boto3.client('s3')
+    s3_client = boto3.client(service_name='s3')
     try:
         s3_client.delete_object(Bucket=bucket, Key=object_name)
         print(f"File {object_name} deleted from {bucket}")
@@ -49,7 +49,7 @@ def delete_from_s3(bucket, object_name):
         return False
     
 def save_text_to_s3(text, bucket, object_name):
-    s3_client = boto3.client('s3')
+    s3_client = boto3.client(service_name='s3')
     try:
         s3_client.put_object(Body=text, Bucket=bucket, Key=object_name)
         print(f"Text file saved to {bucket}/{object_name}")
