@@ -1,9 +1,10 @@
 import boto3
 from langchain.text_splitter import RecursiveCharacterTextSplitter # type: ignore
 from bedrock import create_embeddings
+from typing import List 
 
 
-def chunk(text, chunkSize=512, overlap=32):
+def create_chunks(text: str, chunkSize: int=512, overlap: int=32):
     textSplitter = RecursiveCharacterTextSplitter(
       chunk_size=chunkSize,
       chunk_overlap=overlap,
@@ -13,13 +14,10 @@ def chunk(text, chunkSize=512, overlap=32):
     chunks = textSplitter.split_text(text)
     return chunks
 
-def create_chunks(chunks, region_name, model = 'amazon.titan-embed-text-v2:0', chunkSize=512, overlap=32):
+def create_embeddings_for_chunks(chunks: List[str], region_name: str = 'us-east-1', model = 'amazon.titan-embed-text-v2:0'):
     # given a list of chunks return the list of embeddings
     try:
-        embeddings = []
-        for chunk in chunks:
-            embedding = create_embeddings(chunk, region_name, model, chunkSize, overlap)
-            embeddings.append(embedding)
+        embeddings = [create_embeddings(chunk, region_name, model) for chunk in chunks]
         return embeddings
     except Exception as e:
         print(f"An error occurred: {e}")
