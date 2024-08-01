@@ -17,18 +17,18 @@ def chunk(text, chunkSize=512, overlap=32):
         return None
 
 
-def create_chunks(chunks, region_name, model = 'amazon.titan-embed-text-v2:0', chunkSize=512, overlap=32):
+def create_chunks_embedding(chunks, region_name, model = 'amazon.titan-embed-text-v2:0'):
     # given a list of chunks return the list of embeddings
     try:
         embeddings = []
         for chunk in chunks:
-            embedding = create_embeddings(chunk, region_name, model, chunkSize, overlap)
+            embedding = create_embeddings(chunk, region_name, model)
             embeddings.append(embedding)
         return embeddings
     except Exception as e:
         print(f"An error occurred: {e}")
         return None
     
-#print(chunk("Indian we are the bbbb kiiis ljdsfesf. njjsnfsdf lokaf adica akdianc kjnakncc cnjae", chunkSize=10, overlap =5))
-#embeddings = create_embeddings_chunks(chunks, 'us-east-1')
-# #print(len(embeddings[0]))
+#chunks = chunk("Indian we are the bbbb kiiis ljdsfesf. njjsnfsdf lokaf adica akdianc kjnakncc cnjae", chunkSize=10, overlap =5)
+#embeddings = create_chunks_embedding(chunks, 'us-east-1')
+#print(len(embeddings[0]))
