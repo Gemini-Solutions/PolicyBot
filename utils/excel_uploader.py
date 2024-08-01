@@ -3,6 +3,7 @@ import pandas as pd
 from io import BytesIO
 import datetime
 from bedrock import create_embeddings
+# Configure collection object for storing in DocumentDB.
 
 
 # Function to read Excel or CSV file from S3
@@ -11,6 +12,7 @@ def read_and_clean_excel_or_csv_from_s3(bucket_name, object_key):
         s3_client = boto3.client('s3')
         s3_response = s3_client.get_object(Bucket=bucket_name, Key=object_key)
         file_content = s3_response['Body'].read()
+        print(f'{object_key} data is fetched from S3 {bucket_name} bucket successfully!!')
         
         if object_key.endswith('.xlsx'):
             excel_data = pd.read_excel(BytesIO(file_content), sheet_name=None, header=None)  # Read all sheets
@@ -46,7 +48,10 @@ def read_and_clean_excel_or_csv_from_s3(bucket_name, object_key):
             
             cleaned_excel_data[sheet_name] = sheet_data
         
-        return cleaned_excel_data
+        if cleaned_excel_data:
+            print(f'Data cleaning is done and sent to create embeddings')
+            process_excel_data_and_store(cleaned_excel_data, object_key)
+        return None
 
     except Exception as e:
         print(f"An error occurred while reading the file from S3: {e}")
@@ -55,7 +60,7 @@ def read_and_clean_excel_or_csv_from_s3(bucket_name, object_key):
 
 
 # Function to process Excel/CSV data and store embeddings in DocumentDB
-def process_excel_data_and_store(excel_data, object_key, collection):
+def process_excel_data_and_store(excel_data, object_key):
     try:
         for sheet_name, sheet_data in excel_data.items():
             for index, row in sheet_data.iterrows():
@@ -82,8 +87,8 @@ def process_excel_data_and_store(excel_data, object_key, collection):
                     'embedding': combined_embedding,
                     'metadata': metadata
                 }
-
-                collection.insert_one(doc)
+                
+                # collection.insert_one(doc)
         
         print("Data processed and stored successfully!")
     except Exception as e:
