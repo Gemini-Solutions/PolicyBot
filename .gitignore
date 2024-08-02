@@ -2,4 +2,5 @@ venv
 PDF
 Excels
 .env
+test.py
 __pycache__

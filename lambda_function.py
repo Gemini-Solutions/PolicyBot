@@ -117,7 +117,8 @@ def lambda_handler(event, context):
         
         document = {
             'bucket_name': bucket_name,
-            'object_key': object_key        }
+            'object_key': object_key 
+        }
         
         db = get_db_connection()
         if db is None:
