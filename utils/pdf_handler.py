@@ -1,5 +1,5 @@
-from utils.textract import extract_text_from_pdf
-from utils.chunk_embeddings import create_chunks, create_embeddings_for_chunks
+from textract import extract_text_from_pdf
+from chunk_embeddings import create_chunks, create_embeddings_for_chunks
 
 
 def pdf_handler(bucket_name: str, object_key: str):
@@ -15,3 +15,7 @@ def pdf_handler(bucket_name: str, object_key: str):
     }
 
     return document
+
+
+if __name__ == '__main__':
+    pdf_handler('policybot','Access Policy.pdf')

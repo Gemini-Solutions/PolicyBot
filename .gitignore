@@ -2,3 +2,4 @@ venv
 PDF
 Excels
 .env
+__pycache__
