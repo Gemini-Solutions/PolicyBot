@@ -3,7 +3,6 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter # type: ignor
 from bedrock import create_embeddings
 from typing import List 
 
-
 def create_chunks(text: str, chunkSize: int=512, overlap: int=32):
     textSplitter = RecursiveCharacterTextSplitter(
       chunk_size=chunkSize,
@@ -14,7 +13,7 @@ def create_chunks(text: str, chunkSize: int=512, overlap: int=32):
     chunks = textSplitter.split_text(text)
     return chunks
 
-def create_embeddings_for_chunks(chunks: List[str], region_name: str = 'us-east-1', model = 'amazon.titan-embed-text-v2:0'):
+def create_embeddings_for_chunks(chunks: List[str], region_name: str = 'us-east-1', model = 'amazon.titan-embed-text-v2:0', chunkSize=512, overlap=32):
     # given a list of chunks return the list of embeddings
     try:
         embeddings = [create_embeddings(chunk, region_name, model) for chunk in chunks]

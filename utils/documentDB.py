@@ -6,7 +6,7 @@ load_dotenv()
 connection_string = os.getenv('CONNECTION_STRING')
 def get_db_connection():
     try:
-        client = pymongo.MongoClient('mongodb://gempolicyadmin:Gemini_12345@PolicyDB-851725235990.ap-south-1.docdb-elastic.amazonaws.com:27017/?ssl=true&retryWrites=false')
+        client = pymongo.MongoClient(connection_string)
         db = client.PolicyDB
         return db
     except pymongo.errors.ConnectionError as e:
