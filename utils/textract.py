@@ -16,6 +16,7 @@ def extract_text_from_pdf(bucket, document_key):
         while True:
             response = textract_client.get_document_text_detection(JobId=job_id)
             status = response['JobStatus']
+            print(f"Current job status: {status}")
             if status in ['SUCCEEDED', 'FAILED']:
                 break
             print("Extracting...")
@@ -29,7 +30,12 @@ def extract_text_from_pdf(bucket, document_key):
             return extracted_text
         else:
             print(f"Text detection failed with status: {status}")
+            print("Detailed response:", response)
             return None
+
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return None
 
     except Exception as e:
         print(f"An error occurred: {e}")
