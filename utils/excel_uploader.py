@@ -3,7 +3,7 @@ import pandas as pd
 from io import BytesIO
 import datetime
 from bedrock import create_embeddings
-# Configure collection object for storing in DocumentDB.
+from documentDB import insert_one_entry
 
 
 # Function to read Excel or CSV file from S3
@@ -88,7 +88,7 @@ def process_excel_data_and_store(excel_data, object_key):
                     'metadata': metadata
                 }
                 
-                # collection.insert_one(doc)
+                insert_one_entry('Table', doc)
         
         print("Data processed and stored successfully!")
     except Exception as e:
