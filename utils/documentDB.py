@@ -1,6 +1,7 @@
 import pymongo
 import os
-import numpy as np
+from pymongo import MongoClient
+# from langchain_community.vectorstores import DocumentDBVectorSearch
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -74,23 +75,56 @@ def delete_one_entry(collection_name, filter_query):
     except Exception as e:
         print(f"An error occurred during delete: {e}")
         return None
-    
-def cosine_similarity(vec1, vec2):
-    vec1 = np.array(vec1)
-    vec2 = np.array(vec2)
-    dot_product = np.dot(vec1, vec2)
-    norm_vec1 = np.linalg.norm(vec1)
-    norm_vec2 = np.linalg.norm(vec2)
-    return dot_product / (norm_vec1 * norm_vec2)
 
-def similarity_search(query_embedding, collection_name, top_k=5):
-    documents = find_all_entries(collection_name)
-    similarities = []
+def similarity_search(query_embedding, collection_name: str, top_k=5):
+    client = MongoClient(connection_string)
+    db = client.get_database()
+    collection = db[collection_name]
     
-    for doc in documents:
-        similarity = cosine_similarity(query_embedding, doc['embedding'])
-        similarities.append((doc, similarity))
+    pipeline = [
+        {
+            "$search": {
+                "knnBeta": {
+                    "vector": query_embedding,
+                    "path": "embedding",
+                    "k": top_k
+                }
+            }
+        }
+    ]
+
+    docs = collection.aggregate(pipeline)
+    results = [(doc, doc['_id']) for doc in docs]
     
-    similarities.sort(key=lambda x: x[1], reverse=True)
+    return results[:top_k]
+
+def vector_search(chunks, embeddings, collection_name: str):
+    client = MongoClient(connection_string)
+    db = client.get_database()
+    collection = db[collection_name]
     
-    return similarities[:top_k]
+    documents = [
+        {"textContent": chunk, "embedding": embedding}
+        for chunk, embedding in zip(chunks, embeddings)
+    ]
+    
+    collection.insert_many(documents)
+    
+    collection.create_index(
+        [("embedding", "vector")],
+        name="embedding_index",
+        options={
+            "vectorOptions": {
+                "type": "hnsw",
+                "similarity": "cosine",
+                "dimensions": 1536,
+                "m": 16,
+                "efConstruction": 64
+            }
+        }
+    )
+
+    for index in collection.list_indexes():
+        print(index)
+
+    return "Success"
