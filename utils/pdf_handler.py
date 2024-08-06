@@ -1,5 +1,7 @@
 from textract import extract_text_from_pdf
 from chunk_embeddings import create_chunks, create_embeddings_for_chunks
+import datetime
+from documentDB import insert_many_entry
 
 
 def pdf_handler(bucket_name: str, object_key: str):
@@ -13,6 +15,19 @@ def pdf_handler(bucket_name: str, object_key: str):
         'extracted_text': extracted_text,
         'embedding': chunk_embeddings 
     }
+    metadata = {
+            'source': 'S3 upload',
+            'upload_date': datetime.datetime.now().isoformat(),
+            'file_name': object_key,
+            
+    }
+    docs = [{
+        'text': chunks[i],
+        'embedding': embedding,
+        'metadata': metadata
+    } for i, embedding in enumerate(chunk_embeddings)]
+
+    insert_many_entry('Table', docs)
 
     return document
 

@@ -1,5 +1,6 @@
 import pymongo
 import os
+from typing import List
 import numpy as np
 from dotenv import load_dotenv
 load_dotenv()
@@ -22,6 +23,19 @@ def insert_one_entry(collection_name, document):
         
         collection = db[collection_name]
         result = collection.insert_one(document)
+        return result.inserted_id
+    except Exception as e:
+        print(f"An error occurred during insert: {e}")
+        return None
+    
+def insert_many_entry(collection_name: str, documents: List):
+    try:
+        db = get_db_connection()
+        if db is None:
+            raise ValueError("Failed to connect to DocumentDB.")
+        
+        collection = db[collection_name]
+        result = collection.insert_many(documents)
         return result.inserted_id
     except Exception as e:
         print(f"An error occurred during insert: {e}")
