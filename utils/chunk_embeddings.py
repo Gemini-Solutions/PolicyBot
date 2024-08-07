@@ -1,5 +1,5 @@
 import boto3
-from langchain.text_splitter import RecursiveCharacterTextSplitter # type: ignore
+from splitter import RecursiveCharacterTextSplitter
 from bedrock import create_embeddings
 from typing import List 
 
@@ -22,6 +22,7 @@ def create_embeddings_for_chunks(chunks: List[str], region_name: str = 'us-east-
         print(f"An error occurred: {e}")
         return None
     
-# print(chunk("Indian we are the bbbb kiiis ljdsfesf. njjsnfsdf lokaf adica akdianc kjnakncc cnjae", chunkSize=10, overlap =5))
-#embeddings = create_embeddings_chunks(chunks, 'us-east-1')
-# #print(len(embeddings[0]))
+# chunks = create_chunks("Indian we are the bbbb kiiis ljdsfesf. njjsnfsdf lokaf adica akdianc kjnakncc cnjae", chunkSize=10, overlap =5)
+# print(chunks)
+# embeddings = create_embeddings_for_chunks(chunks, 'us-east-1')
+# print(len(embeddings))
