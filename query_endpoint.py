@@ -47,6 +47,7 @@ Here are the top relevant chunks of text from the database along with their meta
         }
         
     except Exception as e:
+        print(f"Error: {str(e)}")
         return {
             'statusCode': 500,
             'body': json.dumps({'error': str(e)})

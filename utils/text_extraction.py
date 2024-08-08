@@ -11,12 +11,20 @@ def extract_text_from_pdf(bucket, document_key):
         response = textract_client.start_document_text_detection(
             DocumentLocation={'S3Object': {'Bucket': bucket, 'Name': document_key}}
         )
-        job_id = response['JobId']
+        job_id = response.get('JobId')
+        if not job_id:
+            print("Failed to retrieve JobId from response.")
+            return None
+        
         print(f"Started text detection job with JobId: {job_id}")
 
         while True:
             response = textract_client.get_document_text_detection(JobId=job_id)
-            status = response['JobStatus']
+            status = response.get('JobStatus')
+            if not status:
+                print("Failed to retrieve JobStatus from response.")
+                return None
+            
             print(f"Current job status: {status}")
             if status in ['SUCCEEDED', 'FAILED']:
                 break
@@ -27,13 +35,22 @@ def extract_text_from_pdf(bucket, document_key):
             extracted_text = {}
             next_token = None
             while True:
-                response = textract_client.get_document_text_detection(JobId=job_id, NextToken=next_token)
-                for block in response['Blocks']:
-                    if block['BlockType'] == 'LINE':
-                        page_number = block['Page']
+                if next_token:
+                    response = textract_client.get_document_text_detection(JobId=job_id, NextToken=next_token)
+                else:
+                    response = textract_client.get_document_text_detection(JobId=job_id)
+                blocks = response.get('Blocks', [])
+                if not blocks:
+                    break
+                
+                for block in blocks:
+                    if block.get('BlockType') == 'LINE':
+                        page_number = block.get('Page')
+                        if page_number is None:
+                            continue
                         if page_number not in extracted_text:
                             extracted_text[page_number] = ''
-                        extracted_text[page_number] += block['Text'] + '\n'
+                        extracted_text[page_number] += block.get('Text', '') + '\n'
                 
                 next_token = response.get('NextToken')
                 if not next_token:
