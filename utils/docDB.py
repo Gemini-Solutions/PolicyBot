@@ -1,12 +1,9 @@
 import pymongo
-import os
 from pymongo import MongoClient
 from typing import List
-from dotenv import load_dotenv
-load_dotenv()
 
-connection_string = os.getenv('CONNECTION_STRING')
-def get_db_connection():
+
+def get_db_connection(connection_string):
     try:
         client = pymongo.MongoClient(connection_string)
         db = client.PolicyDB
@@ -16,13 +13,8 @@ def get_db_connection():
         return None
 
 
-def insert_one_entry(collection_name, document):
+def insert_one_entry(collection, document):
     try:
-        db = get_db_connection()
-        if db is None:
-            raise ValueError("Failed to connect to DocumentDB.")
-
-        collection = db[collection_name]
         result = collection.insert_one(document)
         return result.inserted_id
     except Exception as e:
@@ -30,26 +22,16 @@ def insert_one_entry(collection_name, document):
         return None
 
 
-def insert_many_entry(collection_name: str, documents: List):
+def insert_many_entry(collection, documents):
     try:
-        db = get_db_connection()
-        if db is None:
-            raise ValueError("Failed to connect to DocumentDB.")
-        
-        collection = db[collection_name]
         result = collection.insert_many(documents)
         return result.inserted_id
     except Exception as e:
         print(f"An error occurred during insert: {e}")
         return None
 
-def find_one_entry(collection_name, filter_query):
+def find_one_entry(collection, filter_query):
     try:
-        db = get_db_connection()
-        if db is None:
-            raise ValueError("Failed to connect to DocumentDB.")
-        
-        collection = db[collection_name]
         document = collection.find_one(filter_query)
         return document
     except Exception as e:
@@ -57,23 +39,13 @@ def find_one_entry(collection_name, filter_query):
         return None
 
 
-def find_all_entries(collection_name, projection=None):
-    db = get_db_connection()
-    if db is None:
-        raise ValueError("Failed to connect to DocumentDB.")
-
-    collection = db[collection_name]
+def find_all_entries(collection, projection=None):
     documents = list(collection.find({}, projection))
     return documents
 
     
-def update_entry(collection_name, filter_query, update_query):
+def update_entry(collection, filter_query, update_query):
     try:
-        db = get_db_connection()
-        if db is None:
-            raise ValueError("Failed to connect to DocumentDB.")
-        
-        collection = db[collection_name]
         result = collection.update_one(filter_query, {'$set': update_query})
         return result.modified_count
     except Exception as e:
@@ -81,13 +53,8 @@ def update_entry(collection_name, filter_query, update_query):
         return None
     
 
-def delete_one_entry(collection_name, filter_query):
+def delete_one_entry(collection, filter_query):
     try:
-        db = get_db_connection()
-        if db is None:
-            raise ValueError("Failed to connect to DocumentDB.")
-        
-        collection = db[collection_name]
         result = collection.delete_one(filter_query)
         return result.deleted_count
     except Exception as e:
@@ -105,7 +72,7 @@ def delete_documents_from_db(collection, object_key):
         return 0
 
 
-def similarity_search(query_embedding, collection_name: str, top_k=5):
+def similarity_search(connection_string, query_embedding, collection_name: str, top_k=5):
     client = MongoClient(connection_string)
     db = client.get_database()
     collection = db[collection_name]
@@ -128,7 +95,7 @@ def similarity_search(query_embedding, collection_name: str, top_k=5):
     return results[:top_k]
 
 
-def vector_search(chunks, embeddings, collection_name: str):
+def vector_search(connection_string, chunks, embeddings, collection_name: str):
     client = MongoClient(connection_string)
     db = client.get_database()
     collection = db[collection_name]

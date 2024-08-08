@@ -1,7 +1,7 @@
 import json
 from bson import json_util
-from utils.documentDB import find_one_entry
-from utils.docdbvectorsearch import get_collection
+from utils.docDB import find_one_entry
+from utils.docdbVS import get_collection
 from utils.excel_uploader import read_and_clean_excel_or_csv_from_s3
 import os
 from dotenv import load_dotenv

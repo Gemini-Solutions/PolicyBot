@@ -2,8 +2,8 @@ import json
 import os
 from dotenv import load_dotenv
 load_dotenv()
-from utils.bedrock import create_embeddings, call_llm
-from utils.docdbvectorsearch import get_collection, similarity_search
+from utils.bedrock_call import create_embeddings, call_llm
+from utils.docdbVS import get_collection, similarity_search
 
 
 def lambda_handler(event, context):

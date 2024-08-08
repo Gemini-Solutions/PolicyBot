@@ -1,5 +1,5 @@
-from splitter import RecursiveCharacterTextSplitter
-from bedrock import create_embeddings
+from utils.split_functions import RecursiveCharacterTextSplitter
+from utils.bedrock_call import create_embeddings
 from typing import List 
 
 def create_chunks(text: str, chunkSize: int=512, overlap: int=32):

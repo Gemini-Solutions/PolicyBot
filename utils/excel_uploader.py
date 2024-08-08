@@ -2,8 +2,8 @@ import boto3
 import pandas as pd
 from io import BytesIO
 import datetime
-from bedrock import create_embeddings
-from documentDB import insert_one_entry
+from utils.bedrock_call import create_embeddings
+from utils.docDB import insert_one_entry
 
 
 def read_and_clean_excel_or_csv_from_s3(bucket_name, object_key):

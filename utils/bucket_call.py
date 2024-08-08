@@ -57,3 +57,5 @@ def save_text_to_s3(text, bucket, object_name):
     except Exception as e:
         print(f"An error occurred: {e}")
         return False
+    
+upload_to_s3( 'PDF\Medical Health Insurance Policy.pdf', 'policybot')

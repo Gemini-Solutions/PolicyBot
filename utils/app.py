@@ -4,12 +4,12 @@ import time
 from bson import json_util
 from dotenv import load_dotenv
 from flask import Flask, request, jsonify
-from bedrock import create_embeddings, call_llm
-from textract import extract_text_from_pdf
-from documentDB import insert_one_entry
-from chunk_embeddings import create_chunks
+from utils.bedrock_call import create_embeddings, call_llm
+from utils.text_extraction import extract_text_from_pdf
+from utils.docDB import insert_one_entry
+from utils.chunk_embed import create_chunks
 from excel_uploader import read_and_clean_excel_or_csv_from_s3
-from docdbvectorsearch import get_collection, similarity_search
+from utils.docdbVS import get_collection, similarity_search
 # Load environment variables
 load_dotenv()
 

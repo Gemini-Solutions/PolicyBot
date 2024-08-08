@@ -1,7 +1,7 @@
-from textract import extract_text_from_pdf
-from chunk_embeddings import create_chunks, create_embeddings_for_chunks
+from utils.text_extraction import extract_text_from_pdf
+from utils.chunk_embed import create_chunks, create_embeddings_for_chunks
 import datetime
-from documentDB import insert_many_entry
+from utils.docDB import insert_many_entry
 
 
 def pdf_handler(bucket_name: str, object_key: str):

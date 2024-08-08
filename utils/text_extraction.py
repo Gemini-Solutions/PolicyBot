@@ -1,7 +1,7 @@
 import os
 import boto3
 import time
-from s3 import upload_to_s3, save_text_to_s3
+from utils.bucket_call import upload_to_s3, save_text_to_s3
 
 
 def extract_text_from_pdf(bucket, document_key):

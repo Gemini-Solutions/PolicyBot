@@ -3,7 +3,7 @@ import json
 from botocore.exceptions import ClientError
 
 
-def call_llm(prompt, region_name='ap-south-1', model='meta.llama3-8b-instruct-v1:0', max_tokens=512):
+def call_llm(prompt, region_name='ap-south-1', model='meta.llama3-70b-instruct-v1:0', max_tokens=512):
     client = boto3.client("bedrock-runtime", region_name=region_name)
     formatted_prompt = f"""
 

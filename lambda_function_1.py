@@ -1,24 +1,22 @@
 import json
 import time
 from bson import json_util
-from utils.documentDB import insert_one_entry
-from utils.textract import extract_text_from_pdf
-from utils.bedrock import create_embeddings
+from utils.bucket_call import delete_from_s3
+from utils.bedrock_call import create_embeddings
+from utils.text_extraction import extract_text_from_pdf
+from utils.docDB import insert_one_entry, get_db_connection, delete_documents_from_db
 from utils.excel_uploader import read_and_clean_excel_or_csv_from_s3
-from utils.s3 import delete_from_s3
-from utils.documentDB import get_db_connection, delete_documents_from_db
+from utils.chunk_embed import create_chunks
 
-
-def create_chunks(text: str, chunk_size: int = 512, overlap: int = 32):
-    chunks = []
-    start = 0
-    while start < len(text):
-        end = start + chunk_size
-        chunk = text[start:end]
-        chunks.append(chunk)
-        start += chunk_size - overlap
-    return chunks
-
+# def create_chunks(text: str, chunk_size: int = 512, overlap: int = 32):
+#     chunks = []
+#     start = 0
+#     while start < len(text):
+#         end = start + chunk_size
+#         chunk = text[start:end]
+#         chunks.append(chunk)
+#         start += chunk_size - overlap
+#     return chunks
 
 def lambda_handler(event, context):
     try:
@@ -46,7 +44,8 @@ def lambda_handler(event, context):
                                 'text': chunk,
                                 'embedding': embedding
                             }
-                            insert_one_entry('ExtractedTexts', chunk_info)
+
+                            # insert_one_entry('ExtractedTexts', chunk_info)
 
             elif object_key.endswith('.xlsx') or object_key.endswith('.csv'):
                 read_and_clean_excel_or_csv_from_s3(bucket_name, object_key)
@@ -60,8 +59,8 @@ def lambda_handler(event, context):
             object_key = event['Records'][0]['s3']['object']['key']
 
             # Delete from S3
-            if not delete_from_s3(bucket_name, object_key):
-                raise ValueError("Failed to delete from S3.")
+            # if not delete_from_s3(bucket_name, object_key):
+            #     raise ValueError("Failed to delete from S3.")
 
             # Delete from DocumentDB
             db = get_db_connection()
@@ -80,3 +79,43 @@ def lambda_handler(event, context):
             'statusCode': 500,
             'body': json.dumps(f'Error: {str(e)}')
         }
+
+event = {
+  "Records": [
+    {
+      "eventVersion": "2.1",
+      "eventSource": "aws:s3",
+      "awsRegion": "ap-south-1",
+      "eventTime": "2024-08-08T12:34:56.789Z",
+      "eventName": "ObjectCreated:Put",
+      "userIdentity": {
+        "principalId": "AWS:dbteam"
+      },
+      "requestParameters": {
+        "sourceIPAddress": "127.0.0.1"
+      },
+      "responseElements": {
+        "x-amz-request-id": "EXAMPLE123456789",
+        "x-amz-id-2": "EXAMPLE123/5678abcdefghijklambdaisawesome/mnopqrstuvwxyzABCDEFGH"
+      },
+      "s3": {
+        "s3SchemaVersion": "1.0",
+        "configurationId": "testConfigRule",
+        "bucket": {
+          "name": "policybot",
+          "ownerIdentity": {
+            "principalId": "c0245ee7afdff41a160f52fd6b6e7430d698e09d8aff391de0f342acfb3006ea"
+          },
+          "arn": "arn:aws:s3:::policybot/Medical Health Insurance Policy.pdf"
+        },
+        "object": {
+          "key": "Medical Health Insurance Policy.pdf",
+          "size": 1024,
+          "eTag": "7c1c284ecb4b0b982781ee738d02b2e2",
+          "sequencer": "0A1B2C3D4E5F678901"
+        }
+      }
+    }
+  ]
+}
+lambda_handler(event,None)
