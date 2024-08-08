@@ -24,10 +24,21 @@ def extract_text_from_pdf(bucket, document_key):
             time.sleep(5)
 
         if status == 'SUCCEEDED':
-            extracted_text = ''
-            for block in response['Blocks']:
-                if block['BlockType'] == 'LINE':
-                    extracted_text += block['Text'] + '\n'
+            extracted_text = {}
+            next_token = None
+            while True:
+                response = textract_client.get_document_text_detection(JobId=job_id, NextToken=next_token)
+                for block in response['Blocks']:
+                    if block['BlockType'] == 'LINE':
+                        page_number = block['Page']
+                        if page_number not in extracted_text:
+                            extracted_text[page_number] = ''
+                        extracted_text[page_number] += block['Text'] + '\n'
+                
+                next_token = response.get('NextToken')
+                if not next_token:
+                    break
+
             return extracted_text
         else:
             print(f"Text detection failed with status: {status}")
