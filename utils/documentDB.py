@@ -1,7 +1,6 @@
 import pymongo
 import os
 from pymongo import MongoClient
-# from langchain_community.vectorstores import DocumentDBVectorSearch
 from typing import List
 from dotenv import load_dotenv
 load_dotenv()
@@ -15,20 +14,22 @@ def get_db_connection():
     except pymongo.errors.ConnectionError as e:
         print(f"Could not connect to MongoDB: {e}")
         return None
-    
+
+
 def insert_one_entry(collection_name, document):
     try:
         db = get_db_connection()
         if db is None:
             raise ValueError("Failed to connect to DocumentDB.")
-        
+
         collection = db[collection_name]
         result = collection.insert_one(document)
         return result.inserted_id
     except Exception as e:
         print(f"An error occurred during insert: {e}")
         return None
-    
+
+
 def insert_many_entry(collection_name: str, documents: List):
     try:
         db = get_db_connection()
@@ -54,15 +55,17 @@ def find_one_entry(collection_name, filter_query):
     except Exception as e:
         print(f"An error occurred during find: {e}")
         return None
-    
-def find_all_entries(collection_name, query=None):
+
+
+def find_all_entries(collection_name, projection=None):
     db = get_db_connection()
     if db is None:
         raise ValueError("Failed to connect to DocumentDB.")
-    
+
     collection = db[collection_name]
-    documents = list(collection.find({},query))
+    documents = list(collection.find({}, projection))
     return documents
+
     
 def update_entry(collection_name, filter_query, update_query):
     try:
@@ -77,6 +80,7 @@ def update_entry(collection_name, filter_query, update_query):
         print(f"An error occurred during update: {e}")
         return None
     
+
 def delete_one_entry(collection_name, filter_query):
     try:
         db = get_db_connection()
@@ -89,6 +93,17 @@ def delete_one_entry(collection_name, filter_query):
     except Exception as e:
         print(f"An error occurred during delete: {e}")
         return None
+
+
+def delete_documents_from_db(collection, object_key):
+    try:
+        result = collection.delete_many({'name': object_key})
+        print(f"Deleted {result.deleted_count} documents from DocumentDB for key {object_key}")
+        return result.deleted_count
+    except Exception as e:
+        print(f"An error occurred while deleting from DocumentDB: {e}")
+        return 0
+
 
 def similarity_search(query_embedding, collection_name: str, top_k=5):
     client = MongoClient(connection_string)
@@ -111,6 +126,7 @@ def similarity_search(query_embedding, collection_name: str, top_k=5):
     results = [(doc, doc['_id']) for doc in docs]
     
     return results[:top_k]
+
 
 def vector_search(chunks, embeddings, collection_name: str):
     client = MongoClient(connection_string)
@@ -137,6 +153,18 @@ def vector_search(chunks, embeddings, collection_name: str):
             }
         }
     )
+#     db.collection.createIndex(
+#   { "vectorEmbedding": "vector" },
+#   { "name": "myIndex",
+#     "vectorOptions": {
+#       "type": "hnsw",
+#       "dimensions": 3,
+#       "similarity": "euclidean",
+#       "m": 16,
+#       "efConstruction": 64
+#     }
+#   }
+# );
 
     for index in collection.list_indexes():
         print(index)

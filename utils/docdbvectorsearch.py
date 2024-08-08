@@ -4,7 +4,6 @@ from enum import Enum
 from typing import List, Dict, Any, Optional
 
 
-# Before Python 3.11 native StrEnum is not available
 class DocumentDBSimilarityType(str, Enum):
     """DocumentDB Similarity Type as enumerator."""
     COS = "cosine"
@@ -12,14 +11,12 @@ class DocumentDBSimilarityType(str, Enum):
     EUC = "euclidean"
 
 
-# Connect to the DocumentDB
 def get_collection(connection_string: str, db_name: str, collection_name: str):
     client = MongoClient(connection_string)
     collection = client[db_name][collection_name]
     return collection
 
 
-# Create an index
 def create_index(collection, index_name: str, embedding_key: str, dimensions: int = 1536,
                  similarity: DocumentDBSimilarityType = DocumentDBSimilarityType.COS,
                  m: int = 16, ef_construction: int = 64) -> Dict[str, Any]:
@@ -45,7 +42,6 @@ def create_index(collection, index_name: str, embedding_key: str, dimensions: in
     return create_index_responses
 
 
-# Check if index exists
 def index_exists(collection, index_name: str) -> bool:
     cursor = collection.list_indexes()
     for res in cursor:
@@ -54,13 +50,11 @@ def index_exists(collection, index_name: str) -> bool:
     return False
 
 
-# Delete an index
 def delete_index(collection, index_name: str) -> None:
     if index_exists(collection, index_name):
         collection.drop_index(index_name)
 
 
-# Add documents to the collection
 def add_documents(collection, texts: List[str], embeddings: List[List[float]],
                   text_key: str, embedding_key: str, metadatas: Optional[List[Dict[str, Any]]] = None):
     if not texts:
@@ -76,24 +70,22 @@ def add_documents(collection, texts: List[str], embeddings: List[List[float]],
     return insert_result.inserted_ids
 
 
-# Delete a document by id
 def delete_document_by_id(collection, document_id: str) -> None:
     collection.delete_one({"_id": ObjectId(document_id)})
 
 
-# Similarity search
-def similarity_search(collection, embeddings: List[float], embedding_key: str, text_key: str,
+def similarity_search(collection, embedding: List[float], embedding_key: str, text_key: str,
                       similarity: DocumentDBSimilarityType = DocumentDBSimilarityType.COS, k: int = 4,
                       ef_search: int = 40, filter: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
     if not filter:
         filter = {}
-    
+
     pipeline = [
         {"$match": filter},
         {
             "$search": {
                 "vectorSearch": {
-                    "vector": embeddings,
+                    "vector": embedding,
                     "path": embedding_key,
                     "similarity": similarity,
                     "k": k,

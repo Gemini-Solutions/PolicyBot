@@ -6,14 +6,13 @@ from bedrock import create_embeddings
 from documentDB import insert_one_entry
 
 
-# Function to read Excel or CSV file from S3
 def read_and_clean_excel_or_csv_from_s3(bucket_name, object_key):
     try:
         s3_client = boto3.client('s3')
         s3_response = s3_client.get_object(Bucket=bucket_name, Key=object_key)
         file_content = s3_response['Body'].read()
         print(f'{object_key} data is fetched from S3 {bucket_name} bucket successfully!!')
-        
+
         if object_key.endswith('.xlsx'):
             excel_data = pd.read_excel(BytesIO(file_content), sheet_name=None, header=None)  # Read all sheets
         elif object_key.endswith('.csv'):
@@ -31,23 +30,23 @@ def read_and_clean_excel_or_csv_from_s3(bucket_name, object_key):
         excel_data.dropna(axis=1, how='all', inplace=True)
         excel_data = excel_data.iloc[1:, :].reset_index(drop=True)
         excel_data = {'Sheet1': excel_data}  # Create a dictionary with one sheet
-        
+
         cleaned_excel_data = {}
         for sheet_name, sheet_data in excel_data.items():
             # Check if columns 'A' and 'B' contain data
             if sheet_data[0].isna().all() or sheet_data[1].isna().all():
                 raise ValueError(f"Sheet {sheet_name} does not contain data in columns 'A' and 'B'. Check the data format.")
- 
+
             initial_row_count = len(sheet_data)
             # Drop rows with null values in 'A' or 'B'
-            sheet_data.dropna(subset=[0,1], inplace=True)
+            sheet_data.dropna(subset=[0, 1], inplace=True)
             cleaned_row_count = len(sheet_data)
             if cleaned_row_count < initial_row_count:
                 dropped_row_percentage = ((initial_row_count - cleaned_row_count) / initial_row_count) * 100
                 # print(f"Sheet {sheet_name}: Dropped {initial_row_count - cleaned_row_count} rows ({dropped_row_percentage:.2f}%) due to null values in columns 'A' or 'B'.")
-            
+
             cleaned_excel_data[sheet_name] = sheet_data
-        
+
         if cleaned_excel_data:
             print(f'Data cleaning is done and sent to create embeddings')
             process_excel_data_and_store(cleaned_excel_data, object_key)
@@ -58,8 +57,6 @@ def read_and_clean_excel_or_csv_from_s3(bucket_name, object_key):
         return None
     
 
-
-# Function to process Excel/CSV data and store embeddings in DocumentDB
 def process_excel_data_and_store(excel_data, object_key):
     try:
         for sheet_name, sheet_data in excel_data.items():
@@ -71,7 +68,7 @@ def process_excel_data_and_store(excel_data, object_key):
                 # print(combined_embedding)
                 if combined_embedding is None:
                     continue
-                
+
                 # Add metadata
                 metadata = {
                     'source': 'S3 upload',
@@ -79,7 +76,7 @@ def process_excel_data_and_store(excel_data, object_key):
                     'file_name': object_key,
                     'sheet_name': sheet_name
                 }
-                
+
                 # Store data in DocumentDB
                 doc = {
                     'question': question,
@@ -87,11 +84,9 @@ def process_excel_data_and_store(excel_data, object_key):
                     'embedding': combined_embedding,
                     'metadata': metadata
                 }
-                
+
                 insert_one_entry('Table', doc)
-        
+
         print("Data processed and stored successfully!")
     except Exception as e:
         print(f"An error occurred while processing and storing the data: {e}")
-
-

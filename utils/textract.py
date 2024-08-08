@@ -3,6 +3,7 @@ import boto3
 import time
 from s3 import upload_to_s3, save_text_to_s3
 
+
 def extract_text_from_pdf(bucket, document_key):
     textract_client = boto3.client(service_name='textract')
 
@@ -32,14 +33,10 @@ def extract_text_from_pdf(bucket, document_key):
             print(f"Text detection failed with status: {status}")
             print("Detailed response:", response)
             return None
-
     except Exception as e:
         print(f"An error occurred: {e}")
         return None
-
-    except Exception as e:
-        print(f"An error occurred: {e}")
-        return None
+    
     
 def pdf_upload_and_text_extraction(file_path, bucket):
     # Upload the PDF to S3

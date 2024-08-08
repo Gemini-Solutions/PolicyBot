@@ -32,11 +32,11 @@ def upload_pdfs_in_folder(folder_path, bucket):
                 file_path = os.path.join(root, file)
                 upload_to_s3(file_path, bucket)
 
-def delete_from_s3(bucket, object_name):
+def delete_from_s3(bucket_name, object_key):
     s3_client = boto3.client(service_name='s3')
     try:
-        s3_client.delete_object(Bucket=bucket, Key=object_name)
-        print(f"File {object_name} deleted from {bucket}")
+        s3_client.delete_object(Bucket=bucket_name, Key=object_key)
+        print(f"Deleted {object_key} from bucket {bucket_name}")
         return True
     except NoCredentialsError:
         print("Credentials not available")
@@ -45,7 +45,7 @@ def delete_from_s3(bucket, object_name):
         print("Incomplete credentials provided")
         return False
     except Exception as e:
-        print(f"An error occurred: {e}")
+        print(f"An error occurred while deleting from S3: {e}")
         return False
     
 def save_text_to_s3(text, bucket, object_name):

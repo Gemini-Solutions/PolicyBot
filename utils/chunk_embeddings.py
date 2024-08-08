@@ -1,4 +1,3 @@
-import boto3
 from splitter import RecursiveCharacterTextSplitter
 from bedrock import create_embeddings
 from typing import List 
