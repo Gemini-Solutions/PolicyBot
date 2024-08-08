@@ -31,19 +31,22 @@ def lambda_handler(event, context):
 
                 if extracted_text is None:
                     raise ValueError("Failed to extract text from the document.")
+                
+                for page, text in extracted_text.items():
+                    print(f"Page {page}:\n{text}")
+                    chunks = create_chunks(text)
 
-                chunks = create_chunks(extracted_text)
-
-                for chunk in chunks:
-                    embedding = create_embeddings(chunk)
-                    if embedding is not None:
-                        chunk_info = {
-                            'name': object_key,
-                            'unique_id': str(time.time()),  # Generate a unique ID based on the current time
-                            'text': chunk,
-                            'embedding': embedding
-                        }
-                        insert_one_entry('ExtractedTexts', chunk_info)
+                    for chunk in chunks:
+                        embedding = create_embeddings(chunk)
+                        if embedding is not None:
+                            chunk_info = {
+                                'name': object_key,
+                                'page_no': page,
+                                'unique_id': str(time.time()),  # Generate a unique ID based on the current time
+                                'text': chunk,
+                                'embedding': embedding
+                            }
+                            insert_one_entry('ExtractedTexts', chunk_info)
 
             elif object_key.endswith('.xlsx') or object_key.endswith('.csv'):
                 read_and_clean_excel_or_csv_from_s3(bucket_name, object_key)
